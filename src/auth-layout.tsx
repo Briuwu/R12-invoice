@@ -1,12 +1,9 @@
-import { Navigate, Outlet } from "react-router";
+import { Navigate } from "react-router";
 
 export default function AuthLayout() {
   const isAuthenticated = true;
   return isAuthenticated ? (
-    <div>
-      <header>header</header>
-      <Outlet />
-    </div>
+    <Navigate to="dashboard" />
   ) : (
     <Navigate to="/login" />
   );
