@@ -1,18 +1,32 @@
-import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
-import Layout from "./layout";
 
-const App = lazy(() => import("./App"));
+import AuthLayout from "./auth-layout";
+import App from "./App";
+import LoginPage from "./pages/login";
+import InvoicesPage from "./pages/invoices";
+import InvoicePage from "./pages/invoice";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Layout,
+    Component: AuthLayout,
     children: [
       {
         index: true,
-        lazy: async () => ({ Component: App }),
+        Component: App,
+      },
+      {
+        path: "invoices",
+        Component: InvoicesPage,
+      },
+      {
+        path: "/invoices/:id",
+        Component: InvoicePage,
       },
     ],
+  },
+  {
+    path: "login",
+    Component: LoginPage,
   },
 ]);
