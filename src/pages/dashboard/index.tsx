@@ -26,16 +26,16 @@ export default function Dashboard() {
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
-            title="Unpaid Invoice"
+            title="Pending Invoice"
             total={"50"}
-            className="bg-red-500 text-white"
+            className="bg-yellow-500 text-white"
           />
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
             title="Expense"
             total={"$500"}
-            className="bg-yellow-500 text-white"
+            className="bg-red-500 text-white"
           />
         </Suspense>
       </div>
