@@ -30,9 +30,10 @@ export default function RecentInvoice() {
 function Invoice() {
   return (
     <li className="flex items-center justify-between py-5">
-      <p className="font-bold uppercase">Invoice #123</p>
+      <p className="font-bold uppercase">#1</p>
+      <p className="text-xs text-red-500">Due: Jan 1, 2025</p>
       <p className="text-xs opacity-75">johndoe@email.com</p>
-      <p className="font-bold text-green-500">$45</p>
+      <p className="text-sm font-bold text-green-500">$45</p>
       <p className="flex items-center gap-2 rounded-md bg-yellow-100 p-2 text-xs font-bold text-yellow-500">
         <span className="block aspect-square w-1.5 rounded-full bg-yellow-500"></span>
         Pending
