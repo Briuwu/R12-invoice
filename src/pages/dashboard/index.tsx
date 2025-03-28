@@ -8,7 +8,7 @@ const RecentInvoice = lazy(() => import("@/pages/dashboard/recent-invoice"));
 export default function Dashboard() {
   return (
     <section>
-      <h1 className="text-xl font-bold uppercase">Dashboard</h1>
+      <h1 className="text-2xl font-bold uppercase">Dashboard</h1>
       <div className="mt-5 grid grid-cols-4 gap-4">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard

@@ -6,7 +6,7 @@ import Layout from "@/pages/layout";
 import App from "@/App";
 import LoginPage from "@/pages/login";
 import InvoicesPage from "@/pages/invoices";
-import InvoicePage from "@/pages/invoice";
+import InvoiceDetailsPage from "@/pages/invoices/invoice-details";
 
 export const router = createBrowserRouter([
   { path: "/", Component: AuthLayout },
@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: App },
       { path: "invoices", Component: InvoicesPage },
-      { path: "invoices/:id", Component: InvoicePage },
+      { path: "invoices/:id", Component: InvoiceDetailsPage },
     ],
   },
   { path: "login", Component: LoginPage },
