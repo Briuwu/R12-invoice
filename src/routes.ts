@@ -11,7 +11,7 @@ import InvoiceDetailsPage from "@/pages/invoices/invoice-details";
 export const router = createBrowserRouter([
   { path: "/", Component: AuthLayout },
   {
-    path: "/dashboard",
+    path: "dashboard",
     Component: Layout,
     children: [
       { index: true, Component: App },
