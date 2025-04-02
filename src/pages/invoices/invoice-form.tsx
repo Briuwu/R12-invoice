@@ -1,9 +1,10 @@
+import { createReceipt } from "@/appwrite";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AnyFieldApi, useForm } from "@tanstack/react-form";
 import { Trash } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -38,7 +39,8 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
 }
 
 export default function InvoiceForm() {
-  const [isVat, setIsVat] = useState(true);
+  const [isPending, startTransition] = useTransition();
+  const [isVAT, setIsVAT] = useState(true);
   const form = useForm({
     defaultValues: {
       cashSales: false,
@@ -56,7 +58,30 @@ export default function InvoiceForm() {
       ] as { name: string; price: number; quantity: number }[],
     },
     onSubmit: ({ value }) => {
-      console.log(value);
+      const receipt = {
+        ...value,
+        isVAT,
+        invoiceNum: "123456",
+        items: value.items.map((item) => ({
+          ...item,
+          totalAmount: String(item.price * item.quantity),
+          price: String(item.price.toFixed(2)),
+          quantity: String(item.quantity),
+        })),
+        receiptTotal: String(
+          value.items.reduce(
+            (acc, item) => acc + item.price * item.quantity,
+            0,
+          ),
+        ),
+      };
+      startTransition(async () => {
+        try {
+          await createReceipt(receipt);
+        } catch (error) {
+          console.log(error);
+        }
+      });
     },
     validators: {
       onSubmit: formSchema,
@@ -72,14 +97,14 @@ export default function InvoiceForm() {
   return (
     <div className="px-4">
       <p className="mb-5 text-center text-3xl font-bold uppercase">
-        {isVat ? "VAT" : "Non-VAT"} Invoice Form
+        {isVAT ? "VAT" : "Non-VAT"} Invoice Form
       </p>
       <div className="mb-5 flex items-center justify-between">
         <Label className="flex items-center gap-2">
           <input
             type="checkbox"
-            checked={isVat}
-            onChange={(e) => setIsVat(e.target.checked)}
+            checked={isVAT}
+            onChange={(e) => setIsVAT(e.target.checked)}
           />
           <span className="block text-xs uppercase">VAT</span>
         </Label>
@@ -332,6 +357,7 @@ export default function InvoiceForm() {
         <Button
           onClick={() => form.handleSubmit()}
           className="mb-5 h-14 w-full bg-green-500 uppercase"
+          disabled={isPending}
         >
           Submit
         </Button>
