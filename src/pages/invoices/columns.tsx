@@ -30,7 +30,7 @@ export const columns: ColumnDef<Payment>[] = [
       return (
         <div
           className={cn(
-            "w-fit rounded px-2 py-1 font-bold capitalize",
+            "w-fit rounded px-2 py-1 text-xs font-bold tracking-wider uppercase",
             statusStyles[status as keyof typeof statusStyles],
           )}
         >
@@ -77,7 +77,9 @@ export const columns: ColumnDef<Payment>[] = [
         currency: "PHP",
       }).format(amount);
 
-      return <div className="text-right font-medium">{formatted}</div>;
+      return (
+        <div className="text-right font-bold text-emerald-500">{formatted}</div>
+      );
     },
   },
   {

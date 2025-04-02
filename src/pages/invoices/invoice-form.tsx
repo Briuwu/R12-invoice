@@ -28,7 +28,7 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
   return (
     <>
       {field.state.meta.isTouched && field.state.meta.errors.length ? (
-        <em className="text-xs text-red-500">
+        <em className="absolute text-xs text-red-500">
           {field.state.meta.errors[0].message}
         </em>
       ) : null}
@@ -143,7 +143,7 @@ export default function InvoiceForm() {
         <hr className="my-3 border-black" />
         <div className="space-y-3">
           <p className="text-lg font-bold uppercase">Sold to:</p>
-          <div className="space-y-5">
+          <div className="space-y-7.5">
             <form.Field name="registeredName">
               {(field) => (
                 <div>
@@ -204,102 +204,113 @@ export default function InvoiceForm() {
           </div>
         </div>
         <hr className="my-5 border-black" />
-        <div className="space-y-3">
+        <div>
           <p className="text-lg font-bold uppercase">Items:</p>
           <form.Field name="items" mode="array">
             {(field) => {
               return (
                 <div className="flex flex-col space-y-3">
                   <FieldInfo field={field} />
-                  {field.state.value.map((_, index) => (
-                    <div key={index} className="flex items-center gap-5 py-2">
-                      <p className="text-sm font-bold text-blue-500 uppercase">
-                        Item {index + 1}:
-                      </p>
-                      <form.Field key={index} name={`items[${index}].name`}>
-                        {(subField) => (
-                          <div className="flex-1">
-                            <Label>
-                              <span className="text-xs font-bold uppercase">
-                                Name:
-                              </span>
-                              <Input
-                                type="text"
-                                value={subField.state.value}
-                                onChange={(e) =>
-                                  subField.handleChange(e.target.value)
-                                }
-                              />
-                            </Label>
-                            <FieldInfo field={subField} />
-                          </div>
-                        )}
-                      </form.Field>
-                      <form.Field name={`items[${index}].price`}>
-                        {(subField) => (
-                          <div>
-                            <Label>
-                              <span className="text-xs font-bold uppercase">
-                                Price:
-                              </span>
-                              <Input
-                                type="number"
-                                value={subField.state.value}
-                                onChange={(e) =>
-                                  subField.handleChange(e.target.valueAsNumber)
-                                }
-                                className="w-40"
-                              />
-                            </Label>
-                            <FieldInfo field={subField} />
-                          </div>
-                        )}
-                      </form.Field>
-
-                      <form.Field name={`items[${index}].quantity`}>
-                        {(subField) => (
-                          <div>
-                            <Label>
-                              <span className="text-xs font-bold uppercase">
-                                Quantity:
-                              </span>
-                              <Input
-                                type="number"
-                                value={subField.state.value}
-                                onChange={(e) =>
-                                  subField.handleChange(e.target.valueAsNumber)
-                                }
-                                className="w-20"
-                              />
-                            </Label>
-                            <FieldInfo field={subField} />
-                          </div>
-                        )}
-                      </form.Field>
-                      <form.Subscribe selector={(state) => state.values.items}>
-                        {(field) => {
-                          const total =
-                            field[index].price * field[index].quantity;
-                          const formatted = new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "PHP",
-                          }).format(total);
-                          return (
-                            <p className="text-sm font-bold text-emerald-500">
-                              {total ? formatted : "₱0.00"}
-                            </p>
-                          );
-                        }}
-                      </form.Subscribe>
-                      <Button
-                        variant="destructive"
-                        onClick={() => field.removeValue(index)}
-                        className="self-start"
+                  <div className="divide-y-2">
+                    {field.state.value.map((_, index) => (
+                      <div
+                        key={index}
+                        className="relative flex items-center gap-5 py-6"
                       >
-                        <Trash />
-                      </Button>
-                    </div>
-                  ))}
+                        <p className="text-sm font-bold text-blue-500 uppercase">
+                          Item {index + 1}:
+                        </p>
+                        <form.Field key={index} name={`items[${index}].name`}>
+                          {(subField) => (
+                            <div className="flex-1">
+                              <Label>
+                                <span className="text-xs font-bold uppercase">
+                                  Name:
+                                </span>
+                                <Input
+                                  type="text"
+                                  value={subField.state.value}
+                                  onChange={(e) =>
+                                    subField.handleChange(e.target.value)
+                                  }
+                                />
+                              </Label>
+                              <FieldInfo field={subField} />
+                            </div>
+                          )}
+                        </form.Field>
+                        <form.Field name={`items[${index}].price`}>
+                          {(subField) => (
+                            <div>
+                              <Label>
+                                <span className="text-xs font-bold uppercase">
+                                  Price:
+                                </span>
+                                <Input
+                                  type="number"
+                                  value={subField.state.value}
+                                  onChange={(e) =>
+                                    subField.handleChange(
+                                      e.target.valueAsNumber,
+                                    )
+                                  }
+                                  className="w-40"
+                                />
+                              </Label>
+                              <FieldInfo field={subField} />
+                            </div>
+                          )}
+                        </form.Field>
+
+                        <form.Field name={`items[${index}].quantity`}>
+                          {(subField) => (
+                            <div>
+                              <Label>
+                                <span className="text-xs font-bold uppercase">
+                                  Quantity:
+                                </span>
+                                <Input
+                                  type="number"
+                                  value={subField.state.value}
+                                  onChange={(e) =>
+                                    subField.handleChange(
+                                      e.target.valueAsNumber,
+                                    )
+                                  }
+                                  className="w-20"
+                                />
+                              </Label>
+                              <FieldInfo field={subField} />
+                            </div>
+                          )}
+                        </form.Field>
+                        <form.Subscribe
+                          selector={(state) => state.values.items}
+                        >
+                          {(field) => {
+                            const total =
+                              field[index].price * field[index].quantity;
+                            const formatted = new Intl.NumberFormat("en-US", {
+                              style: "currency",
+                              currency: "PHP",
+                            }).format(total);
+                            return (
+                              <p className="text-sm font-bold text-emerald-500">
+                                {total ? formatted : "₱0.00"}
+                              </p>
+                            );
+                          }}
+                        </form.Subscribe>
+                        <Button
+                          variant="destructive"
+                          onClick={() => field.removeValue(index)}
+                          className="self-start"
+                        >
+                          <Trash />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                   <Button
                     onClick={() =>
                       field.pushValue({
@@ -308,7 +319,7 @@ export default function InvoiceForm() {
                         quantity: 0,
                       })
                     }
-                    className="self-start"
+                    className="self-end"
                   >
                     + Add New Item
                   </Button>
