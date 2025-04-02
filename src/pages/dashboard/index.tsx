@@ -1,3 +1,4 @@
+import { useReceiptStore } from "@/stores/receipt-store";
 import { LoaderCircle } from "lucide-react";
 import { lazy, Suspense } from "react";
 
@@ -6,45 +7,89 @@ const ChartRevenue = lazy(() => import("@/pages/dashboard/chart-revenue"));
 const RecentInvoice = lazy(() => import("@/pages/dashboard/recent-invoice"));
 
 export default function Dashboard() {
+  const receipt = useReceiptStore((state) => state.receipt);
+
+  const totalPaid = receipt.filter((item) => item.status === "success").length;
+  const totalPending = receipt.filter(
+    (item) => item.status === "pending",
+  ).length;
+  const totalExpenses = receipt.reduce((acc, item) => {
+    if (item.status === "success") {
+      return acc + Number(item.receiptTotal);
+    }
+    return acc;
+  }, 0);
+
+  const allMonths = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const chartData = allMonths.map((month) => {
+    const monthData = receipt.reduce(
+      (acc, item) => {
+        const itemMonth = new Date(item.date).toLocaleString("default", {
+          month: "long",
+        });
+        if (itemMonth === month) {
+          if (item.status === "success") {
+            acc.paid += Number(item.receiptTotal);
+          } else if (item.status === "pending") {
+            acc.unpaid += Number(item.receiptTotal);
+          }
+        }
+        return acc;
+      },
+      { month, paid: 0, unpaid: 0 },
+    );
+    return monthData;
+  });
+
   return (
     <section>
       <h1 className="text-2xl font-bold uppercase">Dashboard</h1>
-      <div className="mt-5 grid grid-cols-4 gap-4">
-        <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <DashboardCard
-            title="Revenue"
-            total={"$1000"}
-            className="bg-green-500 text-white"
-          />
-        </Suspense>
+      <div className="mt-5 grid grid-cols-3 gap-4">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
             title="Paid Invoice"
-            total={"50"}
+            total={totalPaid.toString()}
             className="bg-blue-500 text-white"
           />
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
             title="Pending Invoice"
-            total={"50"}
+            total={totalPending.toString()}
             className="bg-yellow-500 text-white"
           />
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
-            title="Expense"
-            total={"$500"}
+            title="Total Expenses"
+            total={new Intl.NumberFormat("en-PH", {
+              style: "currency",
+              currency: "PHP",
+            }).format(totalExpenses)}
             className="bg-red-500 text-white"
           />
         </Suspense>
       </div>
       <div className="mt-5 grid grid-cols-2 gap-4">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <RecentInvoice />
+          <RecentInvoice receipt={receipt} />
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <ChartRevenue />
+          <ChartRevenue chartData={chartData} />
         </Suspense>
       </div>
     </section>

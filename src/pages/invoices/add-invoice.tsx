@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,8 +13,11 @@ import { LoaderCircle } from "lucide-react";
 const InvoiceForm = lazy(() => import("./invoice-form"));
 
 export default function AddInvoice() {
+  const [open, setOpen] = useState(false);
+
+  const handleClose = () => setOpen(false);
   return (
-    <Sheet>
+    <Sheet onOpenChange={setOpen} open={open}>
       <SheetTrigger asChild>
         <Button>+ New Invoice</Button>
       </SheetTrigger>
@@ -26,7 +29,7 @@ export default function AddInvoice() {
           </SheetDescription>
         </SheetHeader>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <InvoiceForm />
+          <InvoiceForm handleClose={handleClose} />
         </Suspense>
       </SheetContent>
     </Sheet>

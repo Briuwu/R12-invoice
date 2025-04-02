@@ -24,8 +24,10 @@ export type Receipt = {
   isVAT: boolean;
   invoiceNum: string;
   receiptTotal: string;
+  status: string;
+  $createdAt: string;
 };
 
-export type AddReceipt = Omit<Receipt, "id">;
+export type AddReceipt = Omit<Receipt, "id" | "$createdAt">;
 
 export type AddItem = Omit<Item, "id">;

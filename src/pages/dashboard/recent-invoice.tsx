@@ -6,10 +6,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Receipt } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router";
 
-export default function RecentInvoice() {
+type Props = {
+  receipt: Receipt[];
+};
+
+export default function RecentInvoice({ receipt }: Props) {
   return (
     <Card className="max-h-[400px] overflow-hidden">
       <CardHeader className="flex items-center justify-between">
@@ -23,37 +28,47 @@ export default function RecentInvoice() {
       </CardHeader>
       <CardContent className="overflow-auto">
         <ul className="divide-y divide-gray-200">
-          <Invoice />
-          <Invoice />
-          <Invoice />
-          <Invoice />
-          <Invoice />
-          <Invoice />
+          {receipt.map((item) => (
+            <Invoice item={item} />
+          ))}
         </ul>
       </CardContent>
     </Card>
   );
 }
 
-function Invoice() {
+function Invoice({ item }: { item: Receipt }) {
   const statusStyles = {
     success: "bg-green-100 text-green-800",
     pending: "bg-yellow-100 text-yellow-800",
     failed: "bg-red-100 text-red-800",
   };
   return (
-    <li className="flex items-center justify-between py-5">
-      <p className="font-bold uppercase">#1</p>
-      <p className="text-xs text-red-500">Due: Jan 1, 2025</p>
-      <p className="text-xs opacity-75">johndoe@email.com</p>
-      <p className="text-sm font-bold text-green-500">$45</p>
+    <li className="grid grid-cols-5 items-center justify-items-center py-5">
+      <p className="justify-self-start text-sm font-bold uppercase">
+        #{item.invoiceNum}
+      </p>
+      <p className="text-xs text-red-500">
+        {new Date(item.date).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })}
+      </p>
+      <p className="text-center text-sm opacity-75">{item.registeredName}</p>
+      <p className="justify-self-end text-sm font-bold text-green-500">
+        {new Intl.NumberFormat("en-PH", {
+          style: "currency",
+          currency: "PHP",
+        }).format(Number(item.receiptTotal))}
+      </p>
       <p
         className={cn(
-          "flex items-center gap-2 rounded-md p-2 text-xs font-bold capitalize",
-          statusStyles["pending"],
+          "flex items-center gap-2 justify-self-end rounded-md p-2 text-xs font-bold tracking-wider uppercase",
+          statusStyles[item.status as keyof typeof statusStyles],
         )}
       >
-        Pending
+        {item.status}
       </p>
     </li>
   );

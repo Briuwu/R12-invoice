@@ -17,38 +17,36 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const chartData = [
-  { month: "January", desktop: 0, mobile: 0 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 0, mobile: 0 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 20, mobile: 30 },
-  { month: "July", desktop: 0, mobile: 0 },
-  { month: "August", desktop: 132, mobile: 95 },
-  { month: "September", desktop: 189, mobile: 225 },
-  { month: "October", desktop: 302, mobile: 248 },
-  { month: "November", desktop: 5, mobile: 50 },
-  { month: "December", desktop: 328, mobile: 290 },
-];
-
 const chartConfig = {
-  desktop: {
+  paid: {
     label: "Paid Invoice",
     color: "var(--chart-1)",
   },
-  mobile: {
+  unpaid: {
     label: "Unpaid Invoice",
     color: "var(--chart-2)",
   },
 } satisfies ChartConfig;
 
-export default function ChartRevenue() {
+type Props = {
+  chartData: {
+    month: string;
+    paid: number;
+    unpaid: number;
+  }[];
+};
+
+export default function ChartRevenue({ chartData }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardDescription>Invoice Revenue Overview</CardDescription>
-        <CardTitle className="text-3xl font-bold tracking-tight">$45</CardTitle>
+        <CardDescription>Invoice Expenses Overview</CardDescription>
+        <CardTitle className="text-3xl font-bold tracking-tight">
+          {new Intl.NumberFormat("en-PH", {
+            style: "currency",
+            currency: "PHP",
+          }).format(chartData.reduce((acc, item) => acc + item.paid, 0))}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="aspect-[3/1]">
@@ -80,14 +78,14 @@ export default function ChartRevenue() {
               content={<ChartTooltipContent hideIndicator />}
             />
             <Bar
-              dataKey="desktop"
-              fill="var(--color-desktop)"
+              dataKey="paid"
+              fill="var(--color-paid)"
               radius={[0, 0, 4, 4]}
               stackId={1}
             />
             <Bar
-              dataKey="mobile"
-              fill="var(--color-mobile)"
+              dataKey="unpaid"
+              fill="var(--color-unpaid)"
               radius={[4, 4, 0, 0]}
               stackId={1}
             />

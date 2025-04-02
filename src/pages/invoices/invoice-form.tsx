@@ -2,9 +2,17 @@ import { createReceipt } from "@/appwrite";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AnyFieldApi, useForm } from "@tanstack/react-form";
 import { Trash } from "lucide-react";
 import { useState, useTransition } from "react";
+import { useNavigate } from "react-router";
 import { z } from "zod";
 
 const formSchema = z.object({
@@ -14,6 +22,7 @@ const formSchema = z.object({
   registeredName: z.string().min(1, "Registered name is required"),
   tinNumber: z.string().min(1, "TIN number is required"),
   businessAddress: z.string().min(1, "Business address is required"),
+  status: z.string().min(1, "Status is required"),
   items: z
     .array(
       z.object({
@@ -38,7 +47,19 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
   );
 }
 
-export default function InvoiceForm() {
+function generateInvoiceNumber(date: Date) {
+  const year = date.getFullYear().toString().slice(-2); // Get last two digits of the year
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Get month (01-12)
+  const randomNum = Math.floor(Math.random() * 1000000); // Generate a random number (0-999999)
+  return `${year}${month}-${randomNum}`; // Format as YYMM-XXXXXX
+}
+
+type Props = {
+  handleClose: () => void;
+};
+
+export default function InvoiceForm({ handleClose }: Props) {
+  const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
   const [isVAT, setIsVAT] = useState(true);
   const form = useForm({
@@ -49,6 +70,7 @@ export default function InvoiceForm() {
       registeredName: "",
       tinNumber: "",
       businessAddress: "",
+      status: "pending",
       items: [
         {
           name: "",
@@ -61,7 +83,7 @@ export default function InvoiceForm() {
       const receipt = {
         ...value,
         isVAT,
-        invoiceNum: "123456",
+        invoiceNum: generateInvoiceNumber(new Date(value.date)),
         items: value.items.map((item) => ({
           ...item,
           totalAmount: String(item.price * item.quantity),
@@ -78,6 +100,9 @@ export default function InvoiceForm() {
       startTransition(async () => {
         try {
           await createReceipt(receipt);
+          navigate("/dashboard/invoices", { replace: true });
+          window.location.reload();
+          handleClose();
         } catch (error) {
           console.log(error);
         }
@@ -87,12 +112,6 @@ export default function InvoiceForm() {
       onSubmit: formSchema,
     },
   });
-
-  // useEffect(() => {
-  //   form.store.subscribe(() => {
-  //     console.log(form.store.state.values.items);
-  //   });
-  // }, [form.store]);
 
   return (
     <div className="px-4">
@@ -108,7 +127,6 @@ export default function InvoiceForm() {
           />
           <span className="block text-xs uppercase">VAT</span>
         </Label>
-        <p className="text-xs text-gray-500">Invoice No: 123456</p>
       </div>
       <form
         onSubmit={(e) => {
@@ -351,6 +369,30 @@ export default function InvoiceForm() {
                 </div>
               );
             }}
+          </form.Field>
+        </div>
+
+        <hr className="my-5 border-black" />
+        <div>
+          <form.Field name="status">
+            {(field) => (
+              <Label className="flex items-center gap-2">
+                <span className="block text-xs uppercase">Status:</span>
+                <Select
+                  value={field.state.value}
+                  onValueChange={(value) => field.handleChange(value)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Label>
+            )}
           </form.Field>
         </div>
         <hr className="my-5 border-black" />

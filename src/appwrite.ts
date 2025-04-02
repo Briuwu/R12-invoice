@@ -17,3 +17,8 @@ const receiptsCollectionId = import.meta.env.VITE_APPWRITE_RECEIPTS_ID!;
 export const createReceipt = async (data: AddReceipt) => {
   await db.createDocument(databaseId, receiptsCollectionId, ID.unique(), data);
 };
+
+export const getReceipts = async () => {
+  const receipts = await db.listDocuments(databaseId, receiptsCollectionId);
+  return receipts.documents;
+};

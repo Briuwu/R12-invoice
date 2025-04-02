@@ -2,10 +2,12 @@ import { lazy, Suspense } from "react";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { LoaderCircle } from "lucide-react";
+import { useReceiptStore } from "@/stores/receipt-store";
 
 const AddInvoice = lazy(() => import("./add-invoice"));
 
 export default function InvoicesPage() {
+  const data = useReceiptStore((state) => state.receipt);
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -15,23 +17,7 @@ export default function InvoicesPage() {
         </Suspense>
       </div>
       <div className="mt-5">
-        <DataTable
-          columns={columns}
-          data={[
-            {
-              id: "1",
-              amount: 100,
-              status: "success",
-              email: "johndoe@email.com",
-            },
-            {
-              id: "2",
-              amount: 200,
-              status: "pending",
-              email: "janesmith@email.com",
-            },
-          ]}
-        />
+        <DataTable columns={columns} data={data} />
       </div>
     </div>
   );
