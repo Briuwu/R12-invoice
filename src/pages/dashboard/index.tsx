@@ -1,6 +1,15 @@
 import { useReceiptStore } from "@/stores/receipt-store";
 import { LoaderCircle } from "lucide-react";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 const DashboardCard = lazy(() => import("@/pages/dashboard/dashboard-card"));
 const ChartRevenue = lazy(() => import("@/pages/dashboard/chart-revenue"));
@@ -8,18 +17,25 @@ const RecentInvoice = lazy(() => import("@/pages/dashboard/recent-invoice"));
 
 export default function Dashboard() {
   const receipt = useReceiptStore((state) => state.receipt);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  const totalPaid = receipt.filter((item) => item.status === "success").length;
-  const totalPending = receipt.filter(
+  const filteredReceipts = receipt.filter(
+    (item) => new Date(item.date).getFullYear() === selectedYear,
+  );
+
+  const totalPaid = filteredReceipts.filter(
+    (item) => item.status === "success",
+  ).length;
+  const totalPending = filteredReceipts.filter(
     (item) => item.status === "pending",
   ).length;
-  const totalRevenue = receipt.reduce((acc, item) => {
+  const totalRevenue = filteredReceipts.reduce((acc, item) => {
     if (item.status === "success") {
       return acc + Number(item.receiptTotal);
     }
     return acc;
   }, 0);
-  const totalPendingRevenue = receipt.reduce((acc, item) => {
+  const totalPendingRevenue = filteredReceipts.reduce((acc, item) => {
     if (item.status === "pending") {
       return acc + Number(item.receiptTotal);
     }
@@ -42,11 +58,11 @@ export default function Dashboard() {
   ];
 
   const chartData = allMonths.map((month) => {
-    const monthData = receipt.reduce(
+    const monthData = filteredReceipts.reduce(
       (acc, item) => {
-        const itemMonth = new Date(item.date).toLocaleString("default", {
-          month: "long",
-        });
+        const itemDate = new Date(item.date);
+        const itemMonth = itemDate.toLocaleString("default", { month: "long" });
+
         if (itemMonth === month) {
           if (item.status === "success") {
             acc.paid += Number(item.receiptTotal);
@@ -61,9 +77,33 @@ export default function Dashboard() {
     return monthData;
   });
 
+  const years = [
+    ...new Set(receipt.map((item) => new Date(item.date).getFullYear())),
+  ];
+
   return (
     <section>
-      <h1 className="text-2xl font-bold uppercase">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold uppercase">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <Label className="block text-sm font-medium">Select Year:</Label>
+          <Select
+            onValueChange={(value) => setSelectedYear(Number(value))}
+            defaultValue={selectedYear.toString()}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={selectedYear.toString()} />
+            </SelectTrigger>
+            <SelectContent className="max-h-60 overflow-auto">
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
       <div className="mt-5 grid grid-cols-4 gap-4">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
@@ -102,7 +142,7 @@ export default function Dashboard() {
       </div>
       <div className="mt-5 grid grid-cols-2 gap-4">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
-          <RecentInvoice receipt={receipt} />
+          <RecentInvoice receipt={filteredReceipts} />
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <ChartRevenue chartData={chartData} />

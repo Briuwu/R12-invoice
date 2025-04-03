@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { VAT, formatCurrency } from "@/lib/utils";
 import { AnyFieldApi, useForm } from "@tanstack/react-form";
 import { Trash } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -54,7 +55,6 @@ function generateInvoiceNumber(date: Date) {
   return `${year}${month}-${randomNum}`; // Format as YYMM-XXXXXX
 }
 
-const VAT = 0.12; // 12% VAT rate
 type Props = {
   handleClose: () => void;
 };
@@ -340,10 +340,7 @@ export default function InvoiceForm({ handleClose }: Props) {
                           {(field) => {
                             const total =
                               field[index].price * field[index].quantity;
-                            const formatted = new Intl.NumberFormat("en-US", {
-                              style: "currency",
-                              currency: "PHP",
-                            }).format(total);
+                            const formatted = formatCurrency(total);
                             return (
                               <p className="text-sm font-bold text-emerald-500">
                                 {total ? formatted : "₱0.00"}
@@ -412,10 +409,7 @@ export default function InvoiceForm({ handleClose }: Props) {
                 );
                 const VATAmount = isVAT ? total * VAT : 0;
                 const totalWithVAT = isVAT ? total + VATAmount : total;
-                const formatted = new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "PHP",
-                }).format(total);
+                const formatted = formatCurrency(total);
                 return (
                   <div className="grid grid-cols-2 items-center justify-center gap-3">
                     <p className="text-xs font-bold uppercase">Total Sales:</p>
@@ -449,10 +443,7 @@ export default function InvoiceForm({ handleClose }: Props) {
                       Total Amount Due:
                     </p>
                     <p className="text-lg font-bold text-emerald-500">
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "PHP",
-                      }).format(totalWithVAT)}
+                      {formatCurrency(isVAT ? totalWithVAT : total)}
                     </p>
                   </div>
                 );

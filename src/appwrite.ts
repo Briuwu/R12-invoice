@@ -22,3 +22,7 @@ export const getReceipts = async () => {
   const receipts = await db.listDocuments(databaseId, receiptsCollectionId);
   return receipts.documents;
 };
+
+export const updateReceipt = async (id: string, data: Partial<AddReceipt>) => {
+  await db.updateDocument(databaseId, receiptsCollectionId, id, data);
+};

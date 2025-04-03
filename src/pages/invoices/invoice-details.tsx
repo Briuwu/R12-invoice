@@ -1,9 +1,12 @@
+import { updateReceipt } from "@/appwrite";
 import { Button } from "@/components/ui/button";
-import { cn, statusStyles } from "@/lib/utils";
+import { cn, statusStyles, VAT, formatCurrency } from "@/lib/utils";
 import { useReceiptStore } from "@/stores/receipt-store";
+import { useTransition } from "react";
 import { Link, useParams } from "react-router";
 
 export default function InvoiceDetailsPage() {
+  const [isPending, startTransition] = useTransition();
   const { id } = useParams();
   const { getReceiptById } = useReceiptStore((state) => state);
 
@@ -12,6 +15,30 @@ export default function InvoiceDetailsPage() {
   if (!invoice) {
     return <div>Invoice not found</div>;
   }
+
+  const total = invoice.items.reduce(
+    (acc, item) => acc + Number(item.price) * Number(item.quantity),
+    0,
+  );
+  const VATAmount = invoice.isVAT ? total * VAT : 0;
+  const totalWithVAT = invoice.isVAT ? total + VATAmount : total;
+  const formatted = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "PHP",
+  }).format(total);
+
+  const markAsPaid = () => {
+    startTransition(async () => {
+      try {
+        await updateReceipt(invoice.$id, {
+          status: "success",
+        });
+        window.location.reload();
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  };
 
   return (
     <main className="mx-auto max-w-4xl space-y-5">
@@ -30,9 +57,18 @@ export default function InvoiceDetailsPage() {
             {invoice.status}
           </span>
         </p>
-        <Button className="rounded-full bg-blue-500 hover:scale-105">
-          Mark As Paid
-        </Button>
+        <div className="space-x-5">
+          <Button
+            disabled={isPending}
+            onClick={markAsPaid}
+            className="rounded-full bg-blue-500 hover:scale-105"
+          >
+            Mark As Paid
+          </Button>
+          <Button className="rounded-full bg-emerald-500 hover:scale-105">
+            Print Invoice
+          </Button>
+        </div>
       </div>
       <div className="space-y-10 bg-neutral-100 p-5 shadow">
         <div className="flex items-center justify-between">
@@ -49,7 +85,7 @@ export default function InvoiceDetailsPage() {
         </div>
         <div className="grid grid-cols-[.5fr_1fr]">
           <div className="space-y-5">
-            <p className="text-xs font-bold uppercase">
+            <p className="font-bold uppercase">
               {invoice.isVAT ? "VAT Form" : "Non-VAT Form"}
             </p>
             <div className="space-y-1">
@@ -59,6 +95,7 @@ export default function InvoiceDetailsPage() {
                   id="cashSales"
                   name="cashSales"
                   checked={invoice.cashSales}
+                  disabled
                 />
                 <span className="block text-xs uppercase">Cash Sales</span>
               </div>
@@ -68,6 +105,7 @@ export default function InvoiceDetailsPage() {
                   id="chargeSales"
                   name="chargeSales"
                   checked={invoice.chargeSales}
+                  disabled
                 />
                 <span className="block text-xs uppercase">Charge Sales</span>
               </div>
@@ -98,20 +136,48 @@ export default function InvoiceDetailsPage() {
                   className="grid grid-cols-4 items-center justify-items-center rounded bg-neutral-200 p-2 text-sm font-bold capitalize"
                 >
                   <p className="text-xs font-bold">{item.name}</p>
-                  <p className="text-xs font-bold">{item.price}</p>
+                  <p className="text-xs font-bold">
+                    {formatCurrency(Number(item.price))}
+                  </p>
                   <p className="text-xs font-bold">{item.quantity}</p>
-                  <p className="text-xs font-bold">{item.totalAmount}</p>
+                  <p className="text-xs font-bold">
+                    {formatCurrency(Number(item.totalAmount))}
+                  </p>
                 </div>
               ))}
             </div>
+            <hr className="bg-neutral-300" />
             <div className="text-right">
-              <p className="opacity-50">Invoice Total</p>
-              <p className="text-2xl font-bold">
-                {new Intl.NumberFormat("en-PH", {
-                  style: "currency",
-                  currency: "PHP",
-                }).format(Number(invoice.receiptTotal))}
-              </p>
+              <div className="grid grid-cols-2 items-center justify-center gap-3">
+                <p className="text-xs font-bold uppercase">Total Sales:</p>
+                <p className="text-sm font-bold text-emerald-500">
+                  {total ? formatted : "₱0.00"}
+                </p>
+                {invoice.isVAT && (
+                  <>
+                    <p className="text-xs font-bold uppercase">
+                      Less: VAT ({VAT * 100}%):
+                    </p>
+                    <p className="text-xs font-bold text-red-500">
+                      {formatCurrency(VATAmount)}
+                    </p>
+                  </>
+                )}
+                <p className="text-xs font-bold uppercase">Less: Discount:</p>
+                <p className="text-xs font-bold text-red-500">₱0.00</p>
+
+                <p className="text-xs font-bold uppercase">
+                  Less: Witholding Tax:
+                </p>
+                <p className="text-xs font-bold text-red-500">₱0.00</p>
+                <hr className="col-span-full border-black" />
+                <p className="text-xs font-bold uppercase">Total Amount Due:</p>
+                <p className="text-lg font-bold text-emerald-500">
+                  {invoice.isVAT
+                    ? formatCurrency(totalWithVAT)
+                    : formatCurrency(total)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
