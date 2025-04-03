@@ -13,13 +13,13 @@ export default function Dashboard() {
   const totalPending = receipt.filter(
     (item) => item.status === "pending",
   ).length;
-  const totalExpenses = receipt.reduce((acc, item) => {
+  const totalRevenue = receipt.reduce((acc, item) => {
     if (item.status === "success") {
       return acc + Number(item.receiptTotal);
     }
     return acc;
   }, 0);
-  const totalPendingExpenses = receipt.reduce((acc, item) => {
+  const totalPendingRevenue = receipt.reduce((acc, item) => {
     if (item.status === "pending") {
       return acc + Number(item.receiptTotal);
     }
@@ -81,22 +81,22 @@ export default function Dashboard() {
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
-            title="Total Expenses"
+            title="Total Revenue"
             total={new Intl.NumberFormat("en-PH", {
               style: "currency",
               currency: "PHP",
-            }).format(totalExpenses)}
-            className="bg-red-500 text-white"
+            }).format(totalRevenue)}
+            className="bg-emerald-500 text-white"
           />
         </Suspense>
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
-            title="Total Pending Expenses"
+            title="Total Pending Revenue"
             total={new Intl.NumberFormat("en-PH", {
               style: "currency",
               currency: "PHP",
-            }).format(totalPendingExpenses)}
-            className="bg-amber-500 text-white"
+            }).format(totalPendingRevenue)}
+            className="bg-red-500 text-white"
           />
         </Suspense>
       </div>

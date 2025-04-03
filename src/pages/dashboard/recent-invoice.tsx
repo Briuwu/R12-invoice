@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Receipt } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, statusStyles } from "@/lib/utils";
 import { Link } from "react-router";
 
 type Props = {
@@ -38,11 +38,6 @@ export default function RecentInvoice({ receipt }: Props) {
 }
 
 function Invoice({ item }: { item: Receipt }) {
-  const statusStyles = {
-    success: "bg-green-100 text-green-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    failed: "bg-red-100 text-red-800",
-  };
   return (
     <li className="grid grid-cols-5 items-center justify-items-center py-5">
       <p className="justify-self-start text-sm font-bold uppercase">

@@ -12,9 +12,10 @@ import {
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { Receipt } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, statusStyles } from "@/lib/utils";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { Link } from "react-router";
 
 export const columns: ColumnDef<Receipt>[] = [
   {
@@ -72,11 +73,7 @@ export const columns: ColumnDef<Receipt>[] = [
     },
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
-      const statusStyles = {
-        success: "bg-green-100 text-green-800",
-        pending: "bg-yellow-100 text-yellow-800",
-        failed: "bg-red-100 text-red-800",
-      };
+
       return (
         <div
           className={cn(
@@ -197,13 +194,16 @@ export const columns: ColumnDef<Receipt>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(receipt.invoiceNum)}
+              onClick={() => navigator.clipboard.writeText(receipt.$id)}
             >
               Copy receipt number
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to={`/dashboard/invoices/${receipt.$id}`}>
+                View payment details
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

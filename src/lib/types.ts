@@ -13,7 +13,7 @@ export type Item = {
 };
 
 export type Receipt = {
-  id: string;
+  $id: string;
   date: string;
   registeredName: string;
   tinNumber: string;
@@ -28,6 +28,6 @@ export type Receipt = {
   $createdAt: string;
 };
 
-export type AddReceipt = Omit<Receipt, "id" | "$createdAt">;
+export type AddReceipt = Omit<Receipt, "$id" | "$createdAt">;
 
 export type AddItem = Omit<Item, "id">;

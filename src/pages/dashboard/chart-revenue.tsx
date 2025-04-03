@@ -40,7 +40,7 @@ export default function ChartRevenue({ chartData }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardDescription>Invoice Expenses Overview</CardDescription>
+        <CardDescription>Invoice Revenue Overview</CardDescription>
         <CardTitle className="text-3xl font-bold tracking-tight">
           {new Intl.NumberFormat("en-PH", {
             style: "currency",
