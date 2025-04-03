@@ -7,6 +7,7 @@ import App from "@/App";
 import LoginPage from "@/pages/login";
 import InvoicesPage from "@/pages/invoices";
 import InvoiceDetailsPage from "@/pages/invoices/invoice-details";
+
 import { getReceipts } from "./appwrite";
 
 export const router = createBrowserRouter([

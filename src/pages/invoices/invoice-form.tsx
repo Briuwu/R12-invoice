@@ -54,6 +54,7 @@ function generateInvoiceNumber(date: Date) {
   return `${year}${month}-${randomNum}`; // Format as YYMM-XXXXXX
 }
 
+const VAT = 0.12; // 12% VAT rate
 type Props = {
   handleClose: () => void;
 };
@@ -94,7 +95,13 @@ export default function InvoiceForm({ handleClose }: Props) {
           value.items.reduce(
             (acc, item) => acc + item.price * item.quantity,
             0,
-          ),
+          ) +
+            (isVAT
+              ? value.items.reduce(
+                  (acc, item) => acc + item.price * item.quantity,
+                  0,
+                ) * VAT
+              : 0),
         ),
       };
       startTransition(async () => {
@@ -373,27 +380,85 @@ export default function InvoiceForm({ handleClose }: Props) {
         </div>
 
         <hr className="my-5 border-black" />
-        <div>
-          <form.Field name="status">
-            {(field) => (
-              <Label className="flex items-center gap-2">
-                <span className="block text-xs uppercase">Status:</span>
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) => field.handleChange(value)}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="success">Success</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </Label>
-            )}
-          </form.Field>
+        <div className="flex items-center justify-between">
+          <div>
+            <form.Field name="status">
+              {(field) => (
+                <Label className="flex items-center gap-2">
+                  <span className="block text-xs uppercase">Status:</span>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value)}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="success">Success</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="failed">Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Label>
+              )}
+            </form.Field>
+          </div>
+          <div className="text-right">
+            <form.Subscribe selector={(state) => state.values.items}>
+              {(field) => {
+                const total = field.reduce(
+                  (acc, item) => acc + item.price * item.quantity,
+                  0,
+                );
+                const VATAmount = isVAT ? total * VAT : 0;
+                const totalWithVAT = isVAT ? total + VATAmount : total;
+                const formatted = new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "PHP",
+                }).format(total);
+                return (
+                  <div className="grid grid-cols-2 items-center justify-center gap-3">
+                    <p className="text-xs font-bold uppercase">Total Sales:</p>
+                    <p className="text-sm font-bold text-emerald-500">
+                      {total ? formatted : "₱0.00"}
+                    </p>
+                    {isVAT && (
+                      <>
+                        <p className="text-xs font-bold uppercase">
+                          Less: VAT ({VAT * 100}%):
+                        </p>
+                        <p className="text-xs font-bold text-red-500">
+                          {new Intl.NumberFormat("en-US", {
+                            style: "currency",
+                            currency: "PHP",
+                          }).format(VATAmount)}
+                        </p>
+                      </>
+                    )}
+                    <p className="text-xs font-bold uppercase">
+                      Less: Discount:
+                    </p>
+                    <p className="text-xs font-bold text-red-500">₱0.00</p>
+
+                    <p className="text-xs font-bold uppercase">
+                      Less: Witholding Tax:
+                    </p>
+                    <p className="text-xs font-bold text-red-500">₱0.00</p>
+                    <hr className="col-span-full border-black" />
+                    <p className="text-xs font-bold uppercase">
+                      Total Amount Due:
+                    </p>
+                    <p className="text-lg font-bold text-emerald-500">
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "PHP",
+                      }).format(totalWithVAT)}
+                    </p>
+                  </div>
+                );
+              }}
+            </form.Subscribe>
+          </div>
         </div>
         <hr className="my-5 border-black" />
         <Button

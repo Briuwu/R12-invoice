@@ -37,7 +37,17 @@ export const columns: ColumnDef<Receipt>[] = [
   },
   {
     accessorKey: "isVAT",
-    header: "VAT",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          VAT
+          <ArrowUpDown />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const isVAT = row.getValue("isVAT") as boolean;
       return (
@@ -49,7 +59,17 @@ export const columns: ColumnDef<Receipt>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       const statusStyles = {

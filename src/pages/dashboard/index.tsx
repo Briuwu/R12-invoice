@@ -19,6 +19,12 @@ export default function Dashboard() {
     }
     return acc;
   }, 0);
+  const totalPendingExpenses = receipt.reduce((acc, item) => {
+    if (item.status === "pending") {
+      return acc + Number(item.receiptTotal);
+    }
+    return acc;
+  }, 0);
 
   const allMonths = [
     "January",
@@ -58,7 +64,7 @@ export default function Dashboard() {
   return (
     <section>
       <h1 className="text-2xl font-bold uppercase">Dashboard</h1>
-      <div className="mt-5 grid grid-cols-3 gap-4">
+      <div className="mt-5 grid grid-cols-4 gap-4">
         <Suspense fallback={<LoaderCircle className="animate-spin" />}>
           <DashboardCard
             title="Paid Invoice"
@@ -81,6 +87,16 @@ export default function Dashboard() {
               currency: "PHP",
             }).format(totalExpenses)}
             className="bg-red-500 text-white"
+          />
+        </Suspense>
+        <Suspense fallback={<LoaderCircle className="animate-spin" />}>
+          <DashboardCard
+            title="Total Pending Expenses"
+            total={new Intl.NumberFormat("en-PH", {
+              style: "currency",
+              currency: "PHP",
+            }).format(totalPendingExpenses)}
+            className="bg-amber-500 text-white"
           />
         </Suspense>
       </div>
