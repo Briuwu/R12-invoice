@@ -422,10 +422,7 @@ export default function InvoiceForm({ handleClose }: Props) {
                           Less: VAT ({VAT * 100}%):
                         </p>
                         <p className="text-xs font-bold text-red-500">
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "PHP",
-                          }).format(VATAmount)}
+                          {formatCurrency(VATAmount)}
                         </p>
                       </>
                     )}
