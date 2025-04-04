@@ -44,11 +44,13 @@ function Invoice({ item }: { item: Receipt }) {
         #{item.invoiceNum}
       </p>
       <p className="text-xs text-red-500">
-        {new Date(item.date).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })}
+        {item.due
+          ? new Date(item.due).toLocaleDateString("en-US", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            })
+          : "N/A"}
       </p>
       <p className="text-center text-sm opacity-75">{item.registeredName}</p>
       <p className="justify-self-end text-sm font-bold text-green-500">

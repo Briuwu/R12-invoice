@@ -15,12 +15,14 @@ import { AnyFieldApi, useForm } from "@tanstack/react-form";
 import { Trash } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import { z } from "zod";
 
 const formSchema = z.object({
   cashSales: z.boolean(),
   chargeSales: z.boolean(),
   date: z.string().min(1, "Date is required"),
+  due: z.string().min(1, "Due date is required"),
   registeredName: z.string().min(1, "Registered name is required"),
   tinNumber: z.string().min(1, "TIN number is required"),
   businessAddress: z.string().min(1, "Business address is required"),
@@ -35,8 +37,8 @@ const formSchema = z.object({
       }),
     )
     .min(1, "At least one item is required"),
-  shipRegisteredName: z.string().min(1, "Registered name is required"),
-  shipBusinessAddress: z.string().min(1, "Business address is required"),
+  shipRegisteredName: z.string(),
+  shipBusinessAddress: z.string(),
 });
 
 function FieldInfo({ field }: { field: AnyFieldApi }) {
@@ -73,6 +75,7 @@ export default function InvoiceForm({ handleClose }: Props) {
       cashSales: false,
       chargeSales: false,
       date: new Date().toISOString().split("T")[0],
+      due: "",
       registeredName: "",
       tinNumber: "",
       businessAddress: "",
@@ -89,6 +92,12 @@ export default function InvoiceForm({ handleClose }: Props) {
       shipBusinessAddress: "",
     },
     onSubmit: ({ value }) => {
+      if (!isSameInfo) {
+        if (!value.shipRegisteredName || !value.shipBusinessAddress) {
+          toast.error("Please fill in the shipping information.");
+          return;
+        }
+      }
       const receipt = {
         ...value,
         isVAT,
@@ -111,15 +120,23 @@ export default function InvoiceForm({ handleClose }: Props) {
                 ) * VAT
               : 0),
         ),
+        shipRegisteredName: isSameInfo
+          ? value.registeredName
+          : value.shipRegisteredName,
+        shipBusinessAddress: isSameInfo
+          ? value.businessAddress
+          : value.shipBusinessAddress,
       };
       startTransition(async () => {
         try {
           await createReceipt(receipt);
           navigate("/dashboard/invoices", { replace: true });
+          toast.success("Invoice created successfully!");
           window.location.reload();
           handleClose();
         } catch (error) {
           console.log(error);
+          toast.error(`Failed to create invoice: ${error}`);
         }
       });
     },
@@ -180,25 +197,78 @@ export default function InvoiceForm({ handleClose }: Props) {
               )}
             </form.Field>
           </div>
-          <form.Field name="date">
-            {(field) => (
-              <div>
-                <Label className="flex items-center">
-                  <span className="block text-xs uppercase">Date:</span>
-                  <Input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={field.state.value}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                </Label>
-                <FieldInfo field={field} />
-              </div>
-            )}
-          </form.Field>
+          <div className="flex items-center gap-5">
+            <form.Field name="date">
+              {(field) => (
+                <div>
+                  <Label className="flex items-center">
+                    <span className="block text-xs font-bold uppercase">
+                      Date:
+                    </span>
+                    <Input
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className="w-fit"
+                    />
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="due">
+              {(field) => (
+                <div>
+                  <Label className="flex items-center">
+                    <span className="block text-xs font-bold uppercase">
+                      Due Date:
+                    </span>
+                    <Input
+                      type="date"
+                      id="due"
+                      name="due"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className="w-fit"
+                    />
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="status">
+              {(field) => (
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <span className="block text-xs font-bold uppercase">
+                      Status:
+                    </span>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => field.handleChange(value)}
+                    >
+                      <SelectTrigger className="w-fit">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="success">Success</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+          </div>
         </div>
-        <hr className="my-3 border-black" />
+
+        <hr className="my-5 border-black" />
         <div className="space-y-3">
           <p className="text-lg font-bold uppercase">Sold to:</p>
           <div className="space-y-7.5">
@@ -261,7 +331,7 @@ export default function InvoiceForm({ handleClose }: Props) {
             </form.Field>
           </div>
         </div>
-        <hr className="my-3 border-black" />
+        <hr className="my-5 border-black" />
         <div className="mb-5 flex items-center justify-between">
           <Label className="flex items-center gap-2">
             <input
@@ -454,7 +524,6 @@ export default function InvoiceForm({ handleClose }: Props) {
                         <Button
                           variant="destructive"
                           onClick={() => field.removeValue(index)}
-                          className="self-start"
                         >
                           <Trash />
                         </Button>
@@ -481,29 +550,7 @@ export default function InvoiceForm({ handleClose }: Props) {
         </div>
 
         <hr className="my-5 border-black" />
-        <div className="flex items-center justify-between">
-          <div>
-            <form.Field name="status">
-              {(field) => (
-                <Label className="flex items-center gap-2">
-                  <span className="block text-xs uppercase">Status:</span>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value)}
-                  >
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="success">Success</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="failed">Failed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </Label>
-              )}
-            </form.Field>
-          </div>
+        <div className="flex items-center justify-end">
           <div className="text-right">
             <form.Subscribe selector={(state) => state.values.items}>
               {(field) => {
@@ -553,6 +600,17 @@ export default function InvoiceForm({ handleClose }: Props) {
           </div>
         </div>
         <hr className="my-5 border-black" />
+        <form.Subscribe selector={(state) => state.errors}>
+          {(errors) => {
+            if (Object.keys(errors).length > 0) {
+              return (
+                <p className="mb-5 text-center text-sm font-bold text-red-500">
+                  Please fix the errors above before submitting the form.
+                </p>
+              );
+            }
+          }}
+        </form.Subscribe>
         <Button
           onClick={() => form.handleSubmit()}
           className="mb-5 h-14 w-full bg-green-500 uppercase"

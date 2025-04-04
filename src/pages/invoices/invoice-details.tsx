@@ -120,26 +120,40 @@ export default function InvoiceDetailsPage() {
                 })}
               </p>
             </div>
+            <div className="space-y-2">
+              <p className="opacity-50">Due Date</p>
+              <p className="font-bold text-red-500">
+                {invoice.due
+                  ? new Date(invoice.due).toLocaleDateString("en-US", {
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                  : "N/A"}
+              </p>
+            </div>
           </div>
           <div className="space-y-3">
-            <div className="grid grid-cols-4 items-center justify-items-center rounded bg-neutral-200 p-2 text-sm font-bold capitalize">
+            <div className="grid grid-cols-5 items-center justify-items-center rounded bg-neutral-200 p-2 text-center text-sm font-bold capitalize">
               <p className="text-xs font-bold">Item</p>
               <p className="text-xs font-bold">Price</p>
               <p className="text-xs font-bold">Quantity</p>
+              <p className="text-xs font-bold">UOM</p>
               <p className="text-xs font-bold">Total Amount</p>
             </div>
             <hr className="bg-neutral-300" />
-            <div className="max-h-[300px] space-y-3 overflow-auto">
+            <div className="scrollbar max-h-[300px] space-y-3 overflow-auto">
               {invoice.items.map((item) => (
                 <div
                   key={item.name}
-                  className="grid grid-cols-4 items-center justify-items-center rounded bg-neutral-200 p-2 text-sm font-bold capitalize"
+                  className="grid grid-cols-5 items-center justify-items-center rounded bg-neutral-200 p-2 text-center text-sm font-bold capitalize"
                 >
                   <p className="text-xs font-bold">{item.name}</p>
                   <p className="text-xs font-bold">
                     {formatCurrency(Number(item.price))}
                   </p>
                   <p className="text-xs font-bold">{item.quantity}</p>
+                  <p className="text-xs font-bold">{item.uom}</p>
                   <p className="text-xs font-bold">
                     {formatCurrency(Number(item.totalAmount))}
                   </p>

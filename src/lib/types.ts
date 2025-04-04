@@ -9,6 +9,7 @@ export type Item = {
   name: string;
   price: string;
   quantity: string;
+  uom: string;
   totalAmount: string;
 };
 
@@ -26,6 +27,9 @@ export type Receipt = {
   receiptTotal: string;
   status: string;
   $createdAt: string;
+  shipRegisteredName: string;
+  shipBusinessAddress: string;
+  due: string;
 };
 
 export type AddReceipt = Omit<Receipt, "$id" | "$createdAt">;

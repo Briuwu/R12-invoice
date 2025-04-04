@@ -21,7 +21,10 @@ export default function AddInvoice() {
       <SheetTrigger asChild>
         <Button>+ New Invoice</Button>
       </SheetTrigger>
-      <SheetContent side="right" className="overflow-auto sm:max-w-5xl">
+      <SheetContent
+        side="right"
+        className="scrollbar overflow-auto sm:max-w-5xl"
+      >
         <SheetHeader className="text-center">
           <SheetTitle>Create New Invoice</SheetTitle>
           <SheetDescription>
