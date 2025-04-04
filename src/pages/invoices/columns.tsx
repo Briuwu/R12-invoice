@@ -192,9 +192,11 @@ export const columns: ColumnDef<Receipt>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel className="sr-only">Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(receipt.$id)}
+              onClick={() =>
+                navigator.clipboard.writeText(`#${receipt.invoiceNum}`)
+              }
             >
               Copy receipt number
             </DropdownMenuItem>

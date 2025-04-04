@@ -13,6 +13,17 @@ export const statusStyles = {
 
 export const VAT = 0.12;
 
+export const measurementUnits = [
+  { label: "Pieces", value: "PCS" },
+  { label: "Litre", value: "LT" },
+  { label: "Milliliter", value: "ML" },
+  { label: "Meter", value: "MTR" },
+  { label: "Kilograms", value: "KG" },
+  { label: "Centimeters", value: "CM" },
+  { label: "Unit", value: "UNIT" },
+  { label: "Hours", value: "H" },
+];
+
 export function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-PH", {
     style: "currency",

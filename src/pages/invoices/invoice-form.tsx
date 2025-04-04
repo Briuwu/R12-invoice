@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { VAT, formatCurrency } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import { VAT, formatCurrency, measurementUnits } from "@/lib/utils";
 import { AnyFieldApi, useForm } from "@tanstack/react-form";
 import { Trash } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -30,9 +31,12 @@ const formSchema = z.object({
         name: z.string().min(1, "Item name is required"),
         price: z.number().positive("Price must be positive"),
         quantity: z.number().positive("Quantity must be positive"),
+        uom: z.string().min(1, "Unit of measure is required"),
       }),
     )
     .min(1, "At least one item is required"),
+  shipRegisteredName: z.string().min(1, "Registered name is required"),
+  shipBusinessAddress: z.string().min(1, "Business address is required"),
 });
 
 function FieldInfo({ field }: { field: AnyFieldApi }) {
@@ -63,6 +67,7 @@ export default function InvoiceForm({ handleClose }: Props) {
   const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
   const [isVAT, setIsVAT] = useState(true);
+  const [isSameInfo, setIsSameInfo] = useState(false);
   const form = useForm({
     defaultValues: {
       cashSales: false,
@@ -77,8 +82,11 @@ export default function InvoiceForm({ handleClose }: Props) {
           name: "",
           price: 0,
           quantity: 0,
+          uom: "",
         },
-      ] as { name: string; price: number; quantity: number }[],
+      ] as { name: string; price: number; quantity: number; uom: string }[],
+      shipRegisteredName: "",
+      shipBusinessAddress: "",
     },
     onSubmit: ({ value }) => {
       const receipt = {
@@ -253,6 +261,67 @@ export default function InvoiceForm({ handleClose }: Props) {
             </form.Field>
           </div>
         </div>
+        <hr className="my-3 border-black" />
+        <div className="mb-5 flex items-center justify-between">
+          <Label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isSameInfo}
+              onChange={(e) => setIsSameInfo(e.target.checked)}
+            />
+            <span className="block text-xs uppercase">Same as Sold to</span>
+          </Label>
+        </div>
+        <div className="space-y-3">
+          <p className="text-lg font-bold uppercase">Ship to:</p>
+          <div className="space-y-7.5">
+            <form.Field name="shipRegisteredName">
+              {(field) => (
+                <div>
+                  <Label className="grid grid-cols-[0.15fr_1fr] items-center gap-2">
+                    <span className="block text-xs uppercase">Name:</span>
+                    <Input
+                      type="text"
+                      id="shipRegisteredName"
+                      name="shipRegisteredName"
+                      value={
+                        isSameInfo
+                          ? form.getFieldValue("registeredName")
+                          : field.state.value
+                      }
+                      disabled={isSameInfo || isPending}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+
+            <form.Field name="shipBusinessAddress">
+              {(field) => (
+                <div>
+                  <Label className="grid grid-cols-[0.15fr_1fr] items-center gap-2">
+                    <span className="block text-xs uppercase">Address:</span>
+                    <Input
+                      type="text"
+                      id="shipBusinessAddress"
+                      name="shipBusinessAddress"
+                      value={
+                        isSameInfo
+                          ? form.getFieldValue("businessAddress")
+                          : field.state.value
+                      }
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      disabled={isSameInfo || isPending}
+                    />
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+          </div>
+        </div>
         <hr className="my-5 border-black" />
         <div>
           <p className="text-lg font-bold uppercase">Items:</p>
@@ -265,20 +334,19 @@ export default function InvoiceForm({ handleClose }: Props) {
                     {field.state.value.map((_, index) => (
                       <div
                         key={index}
-                        className="relative flex items-center gap-5 py-6"
+                        className="relative flex items-center gap-5 py-8"
                       >
                         <p className="text-sm font-bold text-blue-500 uppercase">
                           Item {index + 1}:
                         </p>
                         <form.Field key={index} name={`items[${index}].name`}>
                           {(subField) => (
-                            <div className="flex-1">
+                            <div className="relative flex-1">
                               <Label>
-                                <span className="text-xs font-bold uppercase">
+                                <span className="absolute -top-5 text-xs font-bold uppercase">
                                   Name:
                                 </span>
-                                <Input
-                                  type="text"
+                                <Textarea
                                   value={subField.state.value}
                                   onChange={(e) =>
                                     subField.handleChange(e.target.value)
@@ -289,34 +357,12 @@ export default function InvoiceForm({ handleClose }: Props) {
                             </div>
                           )}
                         </form.Field>
-                        <form.Field name={`items[${index}].price`}>
-                          {(subField) => (
-                            <div>
-                              <Label>
-                                <span className="text-xs font-bold uppercase">
-                                  Price:
-                                </span>
-                                <Input
-                                  type="number"
-                                  value={subField.state.value}
-                                  onChange={(e) =>
-                                    subField.handleChange(
-                                      e.target.valueAsNumber,
-                                    )
-                                  }
-                                  className="w-40"
-                                />
-                              </Label>
-                              <FieldInfo field={subField} />
-                            </div>
-                          )}
-                        </form.Field>
 
                         <form.Field name={`items[${index}].quantity`}>
                           {(subField) => (
-                            <div>
+                            <div className="relative">
                               <Label>
-                                <span className="text-xs font-bold uppercase">
+                                <span className="absolute -top-5 text-xs font-bold uppercase">
                                   Quantity:
                                 </span>
                                 <Input
@@ -327,13 +373,70 @@ export default function InvoiceForm({ handleClose }: Props) {
                                       e.target.valueAsNumber,
                                     )
                                   }
-                                  className="w-20"
+                                  className="w-24"
                                 />
                               </Label>
                               <FieldInfo field={subField} />
                             </div>
                           )}
                         </form.Field>
+
+                        <form.Field name={`items[${index}].price`}>
+                          {(subField) => (
+                            <div className="relative">
+                              <Label>
+                                <span className="absolute -top-5 text-xs font-bold uppercase">
+                                  Price:
+                                </span>
+                                <Input
+                                  type="number"
+                                  value={subField.state.value}
+                                  onChange={(e) =>
+                                    subField.handleChange(
+                                      e.target.valueAsNumber,
+                                    )
+                                  }
+                                  className="w-24"
+                                />
+                              </Label>
+                              <FieldInfo field={subField} />
+                            </div>
+                          )}
+                        </form.Field>
+
+                        <form.Field name={`items[${index}].uom`}>
+                          {(subField) => (
+                            <div className="relative">
+                              <Label className="flex items-center gap-2">
+                                <span className="absolute -top-5 text-xs font-bold uppercase">
+                                  UOM:
+                                </span>
+                                <Select
+                                  value={subField.state.value}
+                                  onValueChange={(value) =>
+                                    subField.handleChange(value)
+                                  }
+                                >
+                                  <SelectTrigger className="w-32">
+                                    <SelectValue placeholder="Select unit of measure" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {measurementUnits.map((unit) => (
+                                      <SelectItem
+                                        key={unit.value}
+                                        value={unit.value}
+                                      >
+                                        {unit.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </Label>
+                              <FieldInfo field={subField} />
+                            </div>
+                          )}
+                        </form.Field>
+
                         <form.Subscribe
                           selector={(state) => state.values.items}
                         >
@@ -364,6 +467,7 @@ export default function InvoiceForm({ handleClose }: Props) {
                         name: "",
                         price: 0,
                         quantity: 0,
+                        uom: "",
                       })
                     }
                     className="self-end"
