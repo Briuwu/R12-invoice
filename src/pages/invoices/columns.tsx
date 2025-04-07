@@ -20,17 +20,7 @@ import { Link } from "react-router";
 export const columns: ColumnDef<Receipt>[] = [
   {
     accessorKey: "invoiceNum",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Invoice No.
-          <ArrowUpDown />
-        </Button>
-      );
-    },
+    header: "Invoice Number",
     cell: ({ row }) => {
       const invoiceNum = row.getValue("invoiceNum") as string;
       return <div className="font-bold lowercase">#{invoiceNum}</div>;
@@ -38,17 +28,7 @@ export const columns: ColumnDef<Receipt>[] = [
   },
   {
     accessorKey: "isVAT",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          VAT
-          <ArrowUpDown />
-        </Button>
-      );
-    },
+    header: "VAT",
     cell: ({ row }) => {
       const isVAT = row.getValue("isVAT") as boolean;
       return (
@@ -88,17 +68,7 @@ export const columns: ColumnDef<Receipt>[] = [
   },
   {
     accessorKey: "registeredName",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Registered Name
-          <ArrowUpDown />
-        </Button>
-      );
-    },
+    header: () => <p className="text-blue-500">Registered Name</p>,
     cell: ({ row }) => (
       <div className="capitalize">{row.getValue("registeredName")}</div>
     ),
@@ -111,7 +81,7 @@ export const columns: ColumnDef<Receipt>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Date
+          Submitted Date
           <ArrowUpDown />
         </Button>
       );
@@ -126,8 +96,33 @@ export const columns: ColumnDef<Receipt>[] = [
     },
   },
   {
+    accessorKey: "due",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="text-red-500"
+        >
+          Due Date
+          <ArrowUpDown />
+        </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const due = row.getValue("due") as string;
+      if (!due) return <div>N/A</div>;
+      const date = new Date(row.getValue("due")).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      return <div className="lowercase">{date}</div>;
+    },
+  },
+  {
     accessorKey: "cashSales",
-    header: "Cash Sales",
+    header: () => <p className="text-blue-500">Cash Sales</p>,
     cell: ({ row }) => {
       const cashSales = row.getValue("cashSales") as boolean;
       return (
@@ -139,7 +134,7 @@ export const columns: ColumnDef<Receipt>[] = [
   },
   {
     accessorKey: "chargeSales",
-    header: "Charge Sales",
+    header: () => <p className="text-violet-500">Charge Sales</p>,
     cell: ({ row }) => {
       const chargeSales = row.getValue("chargeSales") as boolean;
       return (

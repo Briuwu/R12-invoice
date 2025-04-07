@@ -20,11 +20,11 @@ import {
 const chartConfig = {
   paid: {
     label: "Paid Invoice",
-    color: "var(--chart-1)",
+    color: "var(--chart-2)",
   },
   unpaid: {
-    label: "Unpaid Invoice",
-    color: "var(--chart-2)",
+    label: "Pending Invoice",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 

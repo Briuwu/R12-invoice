@@ -1,4 +1,4 @@
-import { Client, Account, Databases, ID } from "appwrite";
+import { Client, Account, Databases, ID, Query, Models } from "appwrite";
 import { AddReceipt } from "./lib/types";
 
 export const client = new Client();
@@ -19,10 +19,31 @@ export const createReceipt = async (data: AddReceipt) => {
 };
 
 export const getReceipts = async () => {
-  const receipts = await db.listDocuments(databaseId, receiptsCollectionId);
-  return receipts.documents;
+  let documents: Models.Document[] = [];
+  let offset = 0;
+  const LIMIT = 100;
+
+  while (true) {
+    const { documents: newDocuments } = await db.listDocuments(
+      databaseId,
+      receiptsCollectionId,
+      [Query.limit(LIMIT), Query.offset(offset)],
+    );
+
+    if (newDocuments.length === 0) break;
+
+    documents = [...newDocuments, ...documents];
+
+    offset += LIMIT;
+  }
+
+  return documents;
 };
 
 export const updateReceipt = async (id: string, data: Partial<AddReceipt>) => {
   await db.updateDocument(databaseId, receiptsCollectionId, id, data);
+};
+
+export const deleteReceipt = async (id: string) => {
+  await db.deleteDocument(databaseId, receiptsCollectionId, id);
 };
