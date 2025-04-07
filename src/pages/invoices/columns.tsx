@@ -158,6 +158,7 @@ export const columns: ColumnDef<Receipt>[] = [
         </span>
       </Button>
     ),
+    sortingFn: "alphanumeric",
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue("receiptTotal"));
 
