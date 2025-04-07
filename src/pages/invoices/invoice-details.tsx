@@ -6,6 +6,7 @@ import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useTransition } from "react";
 import { Link, useParams } from "react-router";
 import NonVatInvoicePDF from "./invoice-pdf/non-vat";
+import PreviewInvoice from "./preview-invoice";
 
 export default function InvoiceDetailsPage() {
   const [isPending, startTransition] = useTransition();
@@ -67,6 +68,7 @@ export default function InvoiceDetailsPage() {
           >
             Mark As Paid
           </Button>
+          <PreviewInvoice invoice={invoice} />
           <Button
             className="rounded-full bg-emerald-500 hover:scale-105"
             asChild
