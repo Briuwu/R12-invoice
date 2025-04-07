@@ -30,6 +30,12 @@ export type Receipt = {
   shipRegisteredName: string;
   shipBusinessAddress: string;
   due: string;
+  contactPerson: string;
+  salesPerson: string;
+  paymentTerms: string;
+  specialInstruction?: string;
+  salesOrder: string;
+  purchaseOrder: string;
 };
 
 export type AddReceipt = Omit<Receipt, "$id" | "$createdAt">;

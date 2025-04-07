@@ -2,8 +2,10 @@ import { updateReceipt } from "@/appwrite";
 import { Button } from "@/components/ui/button";
 import { cn, statusStyles, VAT, formatCurrency } from "@/lib/utils";
 import { useReceiptStore } from "@/stores/receipt-store";
+import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useTransition } from "react";
 import { Link, useParams } from "react-router";
+import NonVatInvoicePDF from "./invoice-pdf/non-vat";
 
 export default function InvoiceDetailsPage() {
   const [isPending, startTransition] = useTransition();
@@ -65,15 +67,30 @@ export default function InvoiceDetailsPage() {
           >
             Mark As Paid
           </Button>
-          <Button className="rounded-full bg-emerald-500 hover:scale-105">
-            Print Invoice
+          <Button
+            className="rounded-full bg-emerald-500 hover:scale-105"
+            asChild
+          >
+            <PDFDownloadLink
+              document={<NonVatInvoicePDF data={invoice} />}
+              fileName={`non-vat-invoice-${invoice.invoiceNum}.pdf`}
+              className="download-link"
+            >
+              {({ loading }) =>
+                loading ? "Loading NON-VAT Invoice..." : "Print Invoice (PDF)"
+              }
+            </PDFDownloadLink>
           </Button>
         </div>
       </div>
       <div className="space-y-10 bg-neutral-100 p-5 shadow">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="font-bold opacity-50">#{invoice.invoiceNum}</p>
+            <div className="text-xs font-bold opacity-50">
+              <p>Invoice Number: #{invoice.invoiceNum}</p>
+              <p>Purchase Order: {invoice.purchaseOrder}</p>
+              <p>Sales Order: {invoice.salesOrder}</p>
+            </div>
             <p className="text-2xl font-bold capitalize">
               {invoice.registeredName}
             </p>
@@ -83,6 +100,8 @@ export default function InvoiceDetailsPage() {
             {invoice.businessAddress}
           </p>
         </div>
+
+        <hr className="border-black" />
         <div className="grid grid-cols-[.5fr_1fr]">
           <div className="space-y-5">
             <p className="font-bold uppercase">
@@ -194,6 +213,33 @@ export default function InvoiceDetailsPage() {
               </div>
             </div>
           </div>
+        </div>
+        <div className="text-sm italic">
+          <p>Special Instructions:</p>
+          <p className="font-semibold">{invoice.specialInstruction}</p>
+        </div>
+
+        <hr className="border-black" />
+        <div className="grid grid-cols-3 gap-5">
+          <div className="border border-black p-3">
+            <p className="text-sm uppercase opacity-75">Contact Person</p>
+            <p className="font-bold">{invoice.contactPerson}</p>
+          </div>
+          <div className="border border-black p-3">
+            <p className="text-sm uppercase opacity-75">Sales Person</p>
+            <p className="font-bold">{invoice.salesPerson}</p>
+          </div>
+          <div className="border border-black p-3">
+            <p className="text-sm uppercase opacity-75">Payment Terms</p>
+            <p className="font-bold">{invoice.paymentTerms}</p>
+          </div>
+        </div>
+
+        <hr className="border-black" />
+        <div>
+          <p className="text-sm uppercase opacity-75">Ship To:</p>
+          <p className="font-bold">{invoice.shipRegisteredName}</p>
+          <p>{invoice.shipBusinessAddress}</p>
         </div>
       </div>
     </main>

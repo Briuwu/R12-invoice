@@ -47,3 +47,9 @@ export const updateReceipt = async (id: string, data: Partial<AddReceipt>) => {
 export const deleteReceipt = async (id: string) => {
   await db.deleteDocument(databaseId, receiptsCollectionId, id);
 };
+
+export const getReceiptById = async (id: string) => {
+  const document = await db.getDocument(databaseId, receiptsCollectionId, id);
+
+  return document;
+};

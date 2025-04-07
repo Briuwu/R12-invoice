@@ -39,6 +39,10 @@ const formSchema = z.object({
     .min(1, "At least one item is required"),
   shipRegisteredName: z.string(),
   shipBusinessAddress: z.string(),
+  contactPerson: z.string().min(1, "Contact person is required"),
+  salesPerson: z.string().min(1, "Sales person is required"),
+  paymentTerms: z.string().min(1, "Payment terms is required"),
+  specialInstruction: z.string(),
 });
 
 function FieldInfo({ field }: { field: AnyFieldApi }) {
@@ -59,6 +63,16 @@ function generateInvoiceNumber(date: Date) {
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Get month (01-12)
   const randomNum = Math.floor(Math.random() * 1000000); // Generate a random number (0-999999)
   return `${year}${month}-${randomNum}`; // Format as YYMM-XXXXXX
+}
+
+function generatePurcharseOrder() {
+  const randomNum = Math.floor(Math.random() * 1000000); // Generate a random number (0-999999)
+  return `PO-${randomNum}`; // Format as PO-XXXXXX
+}
+
+function generateSalesOrder() {
+  const randomNum = Math.floor(Math.random() * 1000000); // Generate a random number (0-999999)
+  return `SO-${randomNum}`; // Format as SO-XXXXXX
 }
 
 type Props = {
@@ -90,6 +104,10 @@ export default function InvoiceForm({ handleClose }: Props) {
       ] as { name: string; price: number; quantity: number; uom: string }[],
       shipRegisteredName: "",
       shipBusinessAddress: "",
+      contactPerson: "",
+      salesPerson: "",
+      paymentTerms: "",
+      specialInstruction: "",
     },
     onSubmit: ({ value }) => {
       if (!isSameInfo) {
@@ -126,6 +144,8 @@ export default function InvoiceForm({ handleClose }: Props) {
         shipBusinessAddress: isSameInfo
           ? value.businessAddress
           : value.shipBusinessAddress,
+        purchaseOrder: generatePurcharseOrder(),
+        salesOrder: generateSalesOrder(),
       };
       startTransition(async () => {
         try {
@@ -550,6 +570,7 @@ export default function InvoiceForm({ handleClose }: Props) {
         </div>
 
         <hr className="my-5 border-black" />
+
         <div className="flex items-center justify-end">
           <div className="text-right">
             <form.Subscribe selector={(state) => state.values.items}>
@@ -599,6 +620,101 @@ export default function InvoiceForm({ handleClose }: Props) {
             </form.Subscribe>
           </div>
         </div>
+
+        <hr className="my-5 border-black" />
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-10">
+            <div className="space-y-1">
+              <p className="font-bold uppercase">Contact Person:</p>
+              <form.Field name="contactPerson">
+                {(field) => (
+                  <div>
+                    <Label className="grid grid-cols-[0.15fr_1fr] items-center gap-2">
+                      <span className="block text-xs uppercase">Name:</span>
+                      <Input
+                        type="text"
+                        id="contactPerson"
+                        name="contactPerson"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="Enter contact person name here..."
+                        disabled={isPending}
+                      />
+                    </Label>
+                    <FieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+            <div className="space-y-1">
+              <p className="font-bold uppercase">Sales Person:</p>
+              <form.Field name="salesPerson">
+                {(field) => (
+                  <div>
+                    <Label className="grid grid-cols-[0.15fr_1fr] items-center gap-2">
+                      <span className="block text-xs uppercase">Name:</span>
+                      <Input
+                        type="text"
+                        id="salesPerson"
+                        name="salesPerson"
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        placeholder="Enter sales person name here..."
+                        disabled={isPending}
+                      />
+                    </Label>
+                    <FieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="font-bold uppercase">Payment Terms:</p>
+            <form.Field name="paymentTerms">
+              {(field) => (
+                <div>
+                  <Label>
+                    <Textarea
+                      id="paymentTerms"
+                      name="paymentTerms"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className="resize-none"
+                      rows={3}
+                      placeholder="Enter payment terms here..."
+                      disabled={isPending}
+                    />
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+          </div>
+          <div className="space-y-1">
+            <p className="font-bold uppercase">Special Instructions:</p>
+            <form.Field name="specialInstruction">
+              {(field) => (
+                <div>
+                  <Label>
+                    <Textarea
+                      id="specialInstruction"
+                      name="specialInstruction"
+                      value={field.state.value}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      className="resize-none"
+                      rows={3}
+                      placeholder="Enter Special Instructions here..."
+                      disabled={isPending}
+                    />
+                  </Label>
+                  <FieldInfo field={field} />
+                </div>
+              )}
+            </form.Field>
+          </div>
+        </div>
+
         <hr className="my-5 border-black" />
         <form.Subscribe selector={(state) => state.errors}>
           {(errors) => {
