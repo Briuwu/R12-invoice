@@ -31,14 +31,12 @@ const NonVatInvoicePDF = ({ data }: { data: Receipt }) => {
                 </View>
                 <View style={nonVatStyles.companyDetails}>
                   <Text style={nonVatStyles.companyName}>
-                    ICS ICT SUPPORT SERVICES CORP.
+                    R12 EMS PHILS., INC.
                   </Text>
-                  <Text>
-                    Bldg. 19A Berthaphil I Compound, J. Abad Santos Avenue
-                  </Text>
-                  <Text>CSEZ, Clark Field, Angeles City, Philippines</Text>
+                  <Text>New Block 1 Lot 4 & 5, Calamba Premiere</Text>
+                  <Text>International Park, Brgy. Batino, Calamba City</Text>
+                  <Text>Laguna 4027</Text>
                   <Text>Telephone No. (045) 499-1257</Text>
-                  <Text>NON VAT REGISTERED TIN 006-724-950-00000</Text>
                 </View>
               </View>
               <View style={nonVatStyles.invoiceDetails}>
