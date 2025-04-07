@@ -184,28 +184,33 @@ export const nonVatStyles = StyleSheet.create({
     borderTop: "1px solid #ccc",
     paddingTop: 10,
   },
-  signatureCol: {
-    flex: 1,
+  signatureColLeft: {
+    flex: 1, // Takes up left space
+  },
+  signatureColRight: {
+    width: "50%", // Or whatever width looks right
     padding: "0 5px",
     fontSize: 8,
     display: "flex",
     flexDirection: "column",
+    alignItems: "flex-end", // Right-align content
   },
   signatureText: {
-    marginBottom: 3,
-    textAlign: "left",
+    marginBottom: 40, // Space before line
+    textAlign: "right", // Right-align text
     fontSize: 8,
     lineHeight: 1.2,
   },
   signatureLine: {
     borderTop: "1px solid #000",
-    marginTop: 15,
     marginBottom: 3,
-    width: "100%",
+    width: "80%", // Adjust line width as needed
+    marginLeft: "auto", // Push line to right
   },
   signatureLabel: {
     fontSize: 8,
-    textAlign: "center",
+    textAlign: "right", // Right-align label
+    paddingRight: "10%", // Adjust as needed to align with line
   },
   nonVatNotice: {
     textAlign: "center",
